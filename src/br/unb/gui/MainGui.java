@@ -34,6 +34,7 @@ import br.unb.play.TocaMidi;
 public class MainGui implements Runnable {
 
 	private static TocaMidi tocaMidi;
+	private int volumePorCento;
 	
 	private JFrame frmMidiPlayer;
 	private JMenuItem mntmSair,mntmEscolherMidi;

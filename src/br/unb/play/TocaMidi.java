@@ -169,15 +169,6 @@ public class TocaMidi{
         }
     }
     
-    public void sair()
-    {
-        if(sequenciador != null)
-        {
-            sequenciador.stop();
-            sequenciador.close();
-        }
-    }
-    
     public void irPara(String s)
     {
         
