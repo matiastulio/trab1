@@ -6,15 +6,15 @@ import java.io.*;
 public class TocaMidi{
 	
     //variáveis de classe
-    private TocaMidi tempo;
+    private TocaMidi  tempo;
 	
 	private Sequencer sequenciador;
-    private Sequence sequencia;
+    private Sequence  sequencia   ;
     
     private int             iniciar        ;
     private int             numeroTrilhas  ;
     private long            duracao        ;
-    private double          duraTick    ;
+    private double          duraTick       ;
     private float           bpm            ;
     private String          formulaCompasso;
     private String          st             ;
@@ -42,7 +42,7 @@ public class TocaMidi{
         try{
             receptor = sequenciador.getTransmitters().iterator().next().getReceiver();
             sequenciador.getTransmitter().setReceiver(receptor);
-        }catch(MidiUnavailableException e) { }//erro
+        }catch(MidiUnavailableException e) { }//exceção
 
         ShortMessage mensagemDeVolume = new ShortMessage();
         
@@ -226,14 +226,14 @@ public class TocaMidi{
        
        formulaCompasso = formComp.getX() +"/"+ (int)(Math.pow(2, formComp.getY()));
        
-       conjuntoInfo = "andamento                     = "+bpm+ " bpm\n" 
-                    + "resolução                       = "+resolucao
+       conjuntoInfo = "andamento                     = "      +bpm+ " bpm\n" 
+                    + "resolução                       = "    +resolucao
                     + " tiques (nº de divisões da semínima)\n" 
-                    + "número de tiques           = "+totalTicks
+                    + "número de tiques           = "         +totalTicks
                     + "\n" + "duração do tique             = "+duraTick
-                    + " s\n" + "duração da semínima   = "+durseminima
-                    + " s\n" + "total de seminimas        = "+totalseminimas
-                    + "\n" + "Número de trilhas          = "+numeroTrilhas;
+                    + " s\n" + "duração da semínima   = "     +durseminima
+                    + " s\n" + "total de seminimas        = " +totalseminimas
+                    + "\n" + "Número de trilhas          = "  +numeroTrilhas;
    }
 
     static Par getFormulaDeCompasso(Track trilha){
