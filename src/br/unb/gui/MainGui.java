@@ -29,8 +29,12 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
+import br.unb.play.TocaMidi;
+
 public class MainGui implements Runnable {
 
+	private static TocaMidi tocaMidi;
+	
 	private JFrame frmMidiPlayer;
 	private JMenuItem mntmSair,mntmEscolherMidi;
 	private JMenuBar menuBar;
@@ -116,7 +120,7 @@ public class MainGui implements Runnable {
 		lblAndamento = 				new JLabel("Andamento:");
 		lblArmaduraDeTonalidade =	new JLabel("Armadura de Tonalidade:");
 		
-		//labels com os dados vindos dos arquivos, valores iniciais de exemplo. o Certo é eles estarem zerados ao iniciar o programa
+		//labels com os dados vindos dos arquivos, valores iniciais de exemplo. o Certo ï¿½ eles estarem zerados ao iniciar o programa
 		lblArqCompasso = 			new JLabel("3/4");
 		lblArqBpm = 				new JLabel("50bpm");
 		lblArqMetro = 				new JLabel("kkk");
@@ -283,7 +287,7 @@ public class MainGui implements Runnable {
 		//listener do botao parar
 		btnParar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JButton source = (JButton)e.getSource();
+				btnPararActionPerformed(e);//JButton source = (JButton)e.getSource();
 			}
 		});
 		
@@ -291,7 +295,7 @@ public class MainGui implements Runnable {
 		//listener do botao tocar
 		btnTocar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JButton source = (JButton)e.getSource();
+				btnTocarActionPerformed(e);//JButton source = (JButton)e.getSource();
 			}
 		});
 		
@@ -299,7 +303,7 @@ public class MainGui implements Runnable {
 		//listener do botao pausar
 		btnPausar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JButton source = (JButton)e.getSource();
+				btnPausarActionPerformed(e);//JButton source = (JButton)e.getSource();
 			}
 		});
 		
@@ -318,6 +322,18 @@ public class MainGui implements Runnable {
 				JSlider source = (JSlider)e.getSource();
 			}
 		});
+	}
+	
+	private void btnPararActionPerformed(ActionEvent e) {
+        tocaMidi.parar();
+    }
+	
+	private void btnTocarActionPerformed(ActionEvent e){
+		tocaMidi.tocar();
+	}
+	
+	private void btnPausarActionPerformed(ActionEvent e){
+		tocaMidi.pausar();
 	}
 	
 	
