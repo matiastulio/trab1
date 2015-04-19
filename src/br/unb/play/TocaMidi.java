@@ -4,9 +4,8 @@ import javax.sound.midi.*;
 import java.io.*;
 
 public class TocaMidi{
-    /*
-    * Variáveis de classe
-    */
+	
+    //variáveis de classe
     private Sequencer sequenciador;
     private Sequence sequencia;
     private int iniciar;
@@ -21,7 +20,7 @@ public class TocaMidi{
     private String nomearq;
     private static String pathAudios;
     private String tempoTotal;
-    private static Receiver receptor; //Utilizado para alterar o volume
+    private static Receiver receptor; //utilizado para alterar o volume
     static final int MENSAGEM_TONALIDADE = 0x59;
     static final int FORMULA_DE_COMPASSO = 0x58;
     
@@ -61,7 +60,7 @@ public class TocaMidi{
     {
         String[] Dados = new String[4];
         
-        //Preenchendo os dados
+        //preenche os dados
         Dados[0] = formulaCompasso;
         Dados[1] = st;
         Dados[2] = conjuntoInfo;
@@ -101,7 +100,7 @@ public class TocaMidi{
 
             montarDados(sequencia, nomearq);
 
-            //---preparar o sequenciador
+            //prepara o sequenciador
             sequenciador = MidiSystem.getSequencer();
             sequenciador.setSequence(sequencia);
             sequenciador.open();
