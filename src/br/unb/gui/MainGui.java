@@ -2,11 +2,13 @@ package br.unb.gui;
 
 import java.awt.EventQueue;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -21,7 +23,6 @@ import javax.swing.JSeparator;
 import java.awt.Color;
 
 import javax.swing.JPanel;
-
 import javax.swing.UIManager;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
@@ -37,12 +38,14 @@ public class MainGui implements Runnable {
 	private GridBagLayout gridBagLayout;
 	private JPanel painelAux,painelInfo;
 	private JSeparator separadorDados;
+	private String caminhoArquivo;
 	private JSlider sliderTempoMusica,sliderVolume;
 	private JButton btnParar,btnTocar,btnPausar;
 	private GridBagConstraints gbc_sliderTempoMusica,gbc_lblNomeArquivo,gbc_lblInicioTempo,gbc_lblBarraTime,gbc_lblFimTempo,gbc_btnParar,gbc_btnTocar,
 								gbc_btnPausar,gbc_lblVolume,gbc_sliderVolume,gbc_separadorDados,gbc_painelAux;
 	private JLabel lblNomeArquivo,lblInicioTempo,lblBarraTime,lblFimTempo,lblVolume,lblFormulaDeCompasso,lblMetro,lblAndamento,lblArmaduraDeTonalidade,
 								lblArqArmadura,lblArqCompasso,lblArqBpm,lblArqMetro;
+	
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -65,6 +68,64 @@ public class MainGui implements Runnable {
 		setaOLayout();
 		listeners();
 	}
+	
+	private void inicializa() {
+		//paineis, frames e layout
+		frmMidiPlayer = new JFrame();
+		painelInfo = 	new JPanel();
+		painelAux = 	new JPanel();
+		gridBagLayout = new GridBagLayout();
+		
+		//menu
+		menuBar = 			new JMenuBar();
+		mnArquivo = 		new JMenu("Arquivo");
+		mntmSair = 			new JMenuItem("Sair");
+		mntmEscolherMidi = 	new JMenuItem("Abrir");
+		
+		//sliders 
+		sliderTempoMusica = new JSlider();
+		sliderVolume = 		new JSlider();
+		
+		//botoes
+		btnParar = 	new JButton("\u220e");
+		btnTocar = 	new JButton("\u2023");
+		btnPausar = new JButton("\u275A\u275A");
+		
+		//GridBagConstraints
+		gbc_sliderTempoMusica = new GridBagConstraints();
+		gbc_lblInicioTempo = 	new GridBagConstraints();
+		gbc_lblBarraTime = 		new GridBagConstraints();
+		gbc_lblFimTempo =		new GridBagConstraints();
+		gbc_btnParar = 			new GridBagConstraints();
+		gbc_btnTocar = 			new GridBagConstraints();
+		gbc_btnPausar = 		new GridBagConstraints();
+		gbc_lblVolume = 		new GridBagConstraints();
+		gbc_sliderVolume = 		new GridBagConstraints();
+		gbc_separadorDados = 	new GridBagConstraints();
+		gbc_painelAux = 		new GridBagConstraints();
+		gbc_lblNomeArquivo = 	new GridBagConstraints();
+		
+		//labels
+		lblFimTempo =				new JLabel("23:59:59");
+		lblInicioTempo = 			new JLabel("23:59:59");
+		lblNomeArquivo = 			new JLabel("Nome do arquivo MIDI ");
+		lblBarraTime = 				new JLabel("/");
+		lblVolume = 				new JLabel("Volume");
+		lblFormulaDeCompasso = 		new JLabel("Formula de Compasso:");
+		lblMetro = 					new JLabel("Metro:");
+		lblAndamento = 				new JLabel("Andamento:");
+		lblArmaduraDeTonalidade =	new JLabel("Armadura de Tonalidade:");
+		
+		//labels com os dados vindos dos arquivos, valores iniciais de exemplo. o Certo é eles estarem zerados ao iniciar o programa
+		lblArqCompasso = 			new JLabel("3/4");
+		lblArqBpm = 				new JLabel("50bpm");
+		lblArqMetro = 				new JLabel("kkk");
+		lblArqArmadura = 			new JLabel("do#");
+		
+
+		separadorDados = new JSeparator();
+	}
+
 
 	private void setaOLayout() {
 		
@@ -171,7 +232,7 @@ public class MainGui implements Runnable {
 		frmMidiPlayer.getContentPane().add(sliderTempoMusica, gbc_sliderTempoMusica);
 		frmMidiPlayer.getContentPane().add(lblNomeArquivo, gbc_lblNomeArquivo);
 		
-		//config do painel de informacao
+		//********config do painel de informacao********//
 		painelInfo.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, new Color(0, 0, 255), new Color(0, 0, 255), new Color(0, 0, 255), new Color(0, 0, 255)));
 		painelInfo.setBackground(new Color(64, 224, 208));
 		painelInfo.setBounds(78, 35, 370, 128);
@@ -198,62 +259,6 @@ public class MainGui implements Runnable {
 		painelInfo.add(lblAndamento);
 		
 	}
-	
-	private void inicializa() {
-		//paineis & frames
-		frmMidiPlayer = new JFrame();
-		painelInfo = 	new JPanel();
-		painelAux = 	new JPanel();
-		gridBagLayout = new GridBagLayout();
-		
-		//menu
-		menuBar = 			new JMenuBar();
-		mnArquivo = 		new JMenu("Arquivo");
-		mntmSair = 			new JMenuItem("Sair");
-		mntmEscolherMidi = 	new JMenuItem("Escolher MIDI");
-		
-		//sliders 
-		sliderTempoMusica = new JSlider();
-		sliderVolume = 		new JSlider();
-		
-		//botoes
-		btnParar = 	new JButton("\u220e");
-		btnTocar = 	new JButton("\u2023");
-		btnPausar = new JButton("\u275A\u275A");
-		
-		//GridBagConstraints
-		gbc_sliderTempoMusica = new GridBagConstraints();
-		gbc_lblInicioTempo = 	new GridBagConstraints();
-		gbc_lblBarraTime = 		new GridBagConstraints();
-		gbc_lblFimTempo =		new GridBagConstraints();
-		gbc_btnParar = 			new GridBagConstraints();
-		gbc_btnTocar = 			new GridBagConstraints();
-		gbc_btnPausar = 		new GridBagConstraints();
-		gbc_lblVolume = 		new GridBagConstraints();
-		gbc_sliderVolume = 		new GridBagConstraints();
-		gbc_separadorDados = 	new GridBagConstraints();
-		gbc_painelAux = 		new GridBagConstraints();
-		gbc_lblNomeArquivo = 	new GridBagConstraints();
-		
-		//labels
-		lblFimTempo =				new JLabel("23:59:59");
-		lblInicioTempo = 			new JLabel("23:59:59");
-		lblNomeArquivo = 			new JLabel("Nome do arquivo MIDI ");
-		lblBarraTime = 				new JLabel("/");
-		lblVolume = 				new JLabel("Volume");
-		lblFormulaDeCompasso = 		new JLabel("Formula de Compasso:");
-		lblMetro = 					new JLabel("Metro:");
-		lblAndamento = 				new JLabel("Andamento:");
-		lblArmaduraDeTonalidade =	new JLabel("Armadura de Tonalidade:");
-		lblArqCompasso = 			new JLabel("3/4");
-		lblArqBpm = 				new JLabel("50bpm");
-		lblArqMetro = 				new JLabel("kkk");
-		lblArqArmadura = 			new JLabel("do#");
-		
-
-		separadorDados = new JSeparator();
-	}
-
 
 
 	private void listeners(){
@@ -264,9 +269,14 @@ public class MainGui implements Runnable {
 				frmMidiPlayer.dispose();}
 			});
 		
-		//listener do botao escolher MIDI do menu
+		//listener do botao abrir do menu
 		mntmEscolherMidi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand() == "Abrir"){
+					caminhoArquivo = abrirArquivo();
+					if (caminhoArquivo != "")
+						lblNomeArquivo.setText(caminhoArquivo);
+				}
 			}
 		});
 		
@@ -309,6 +319,48 @@ public class MainGui implements Runnable {
 			}
 		});
 	}
+	
+	
+	private String abrirArquivo(){
+		 String caminhoArquivo = "";
+		  
+		  JFileChooser arquivo = new JFileChooser(".");
+
+		  UIManager.put("FileChooser.openDialogTitleText", "Abrir");
+		  UIManager.put("FileChooser.lookInLabelText", "Consultar em");
+		  UIManager.put("FileChooser.openButtonText", "Abrir");
+		  UIManager.put("FileChooser.cancelButtonText", "Cancelar");
+		  UIManager.put("FileChooser.fileNameLabelText", "Nome do Arquivo");
+		  UIManager.put("FileChooser.filesOfTypeLabelText", "Tipo de Arquivo");
+		  UIManager.put("FileChooser.openButtonToolTipText", "Abrir o Arquivo Selecionado");
+		  UIManager.put("FileChooser.cancelButtonToolTipText","Cancelar");
+		  UIManager.put("FileChooser.fileNameHeaderText","Nome");
+		  UIManager.put("FileChooser.upFolderToolTipText", "Subir um Nivel");
+		  UIManager.put("FileChooser.homeFolderToolTipText","Area de Trabalho");
+		  UIManager.put("FileChooser.newFolderToolTipText","Criar Nova Pasta");
+		  UIManager.put("FileChooser.listViewButtonToolTipText","Lista");
+		  UIManager.put("FileChooser.newFolderButtonText","Criar Nova Pasta");
+		  UIManager.put("FileChooser.renameFileButtonText", "Renomear");
+		  UIManager.put("FileChooser.deleteFileButtonText", "Deletar");
+		  UIManager.put("FileChooser.filterLabelText", "Tipo");
+		  UIManager.put("FileChooser.detailsViewButtonToolTipText", "Detalhes");
+		  UIManager.put("FileChooser.fileSizeHeaderText","Tamanho");
+		  UIManager.put("FileChooser.fileDateHeaderText", "Data de Modificacao");
+		  UIManager.put("FileChooser.acceptAllFileFilterText", "Todos os Arquivos");
+		  
+		  SwingUtilities.updateComponentTreeUI(arquivo);
+
+		  int retorno = arquivo.showOpenDialog(null);
+
+		  if(retorno == JFileChooser.APPROVE_OPTION)
+		  {
+			  caminhoArquivo = arquivo.getSelectedFile().getAbsolutePath();
+			  //JOptionPane.showMessageDialog(null, caminhoArquivo);
+			  return caminhoArquivo;
+		  }
+		  return "";
+	}
+	
 	@Override
 	public void run() {
 		
