@@ -444,6 +444,10 @@ public class MainGui {
 	}
 
 	public String toFormatoDeHora(long seconds){
+		Long hora = TimeUnit.SECONDS.toHours(seconds);
+		Long min  = TimeUnit.SECONDS.toMinutes(seconds);
+		Long seg  = seconds%60;
+		
 		return String.format("%d:%d:%d",
 				TimeUnit.SECONDS.toHours(seconds), 
 			    TimeUnit.SECONDS.toMinutes(seconds),
