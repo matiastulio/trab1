@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -125,17 +126,17 @@ public class MainGui {
 		lblInicioTempo            = new JLabel("        "               );
 		lblNomeArquivo            = new JLabel("  "  					);
 		lblBarraTime              = new JLabel("/"                      );
-		lblVolume                 = new JLabel("Volume"                 );
+		lblVolume                 = new JLabel("Volume:"                 );
 		lblFormulaDeCompasso      = new JLabel("Formula de Compasso:"   );
 		lblMetro  				  = new JLabel("Metro:"                 );
 		lblAndamento              = new JLabel("Andamento:"             );
 		lblArmaduraDeTonalidade   =	new JLabel("Armadura de Tonalidade:");
 		
 		//labels com os dados vindos dos arquivos, valores iniciais de exemplo. o Certo � eles estarem zerados ao iniciar o programa
-		lblArqCompasso = 			new JLabel("3/4");
-		lblArqBpm = 				new JLabel("50bpm");
-		lblArqMetro = 				new JLabel("kkk");
-		lblArqArmadura = 			new JLabel("do#");
+		lblArqCompasso = 			new JLabel("  ");
+		lblArqBpm = 				new JLabel("  ");
+		lblArqMetro = 				new JLabel("  ");
+		lblArqArmadura = 			new JLabel("  ");
 		
 
 		separadorDados = new JSeparator();
@@ -344,7 +345,6 @@ public class MainGui {
 			}
 		});
 		
-		
 		//listener do slider de volume
 		sliderVolume.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -352,16 +352,6 @@ public class MainGui {
 			}
 		});
 		
-		//listener do slider do tempo de musica
-//		sliderTempoMusica.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent e) {
-//				if(!tocaMidi.novoTocador()){
-//					//atualizador.interrupt();
-//					tocaMidi.vaiPara(sliderTempoMusica.getValue());
-//					//trabalhadorTempo();
-//				}
-//			}
-//		});
 		sliderTempoMusica.addMouseListener(new MouseListener() {
 			
 			@Override
@@ -423,7 +413,6 @@ public class MainGui {
 		  if(retorno == JFileChooser.APPROVE_OPTION)
 		  {
 			  caminhoArquivo = arquivo.getSelectedFile().getAbsolutePath();
-			  //JOptionPane.showMessageDialog(null, caminhoArquivo);
 			  return caminhoArquivo;
 		  }
 		  return "";
@@ -443,6 +432,11 @@ public class MainGui {
 			sliderTempoMusica.setValue(0);
 			lblFimTempo.setText(toFormatoDeHora(tempoTotal));
 			lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+			lblArqBpm.setText(tocaMidi.getAndamento()+" BPM");
+			lblArqArmadura.setText(tocaMidi.getTonalidade());
+			Dimension d = tocaMidi.getFormulaDeCompasso();
+			lblArqCompasso.setText((int)d.getWidth()+"/"+(int)d.getHeight());
+			lblArqMetro.setText("1/"+d.height);
 		} 
 		catch (InvalidMidiDataException e1) {} 
 		catch (IOException e1) {} 
@@ -458,46 +452,37 @@ public class MainGui {
 	
 	private void trabalhadorTempo() {
 		atualizador = new Thread() {
-			private boolean parar = false;
-			
-			@Override
-			public void interrupt() {
-				parar = true;
-				super.interrupt();
-			}
-
-
-			public void run() {
-			//System.out.println("progressbar trabalhando");
-			while(!parar && tempoAtual < tempoTotal){
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-
-				}
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						if(tempoAtual+1 == tempoTotal){
-							sliderTempoMusica.setValue(0);
-							interrupt();
-						}
-						sliderTempoMusica.setValue((int) tempoAtual);
-						lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+					private boolean parar = false;
+					
+					@Override
+					public void interrupt() {
+						parar = true;
+						super.interrupt();
 					}
-				});
-				tempoAtual++;
-			}
-			//System.out.println("progressbar saindo");
-//			SwingUtilities.invokeLater(new Runnable() {
-//				public void run() {
-//					// statusLabel.setText("Completed.");
-//				}
-//			});
-
-		}
 		
-	};
-
-	atualizador.start();	
+		
+					public void run() {
+					while(!parar && tempoAtual < tempoTotal){
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+		
+						}
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								if(tempoAtual+1 == tempoTotal){
+									sliderTempoMusica.setValue(0);
+									interrupt();
+								}
+								sliderTempoMusica.setValue((int) tempoAtual);
+								lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+							}
+						});
+						tempoAtual++;
+					}
+				}
+				
+			};
+		atualizador.start();	
 	}
 }
