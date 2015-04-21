@@ -6,8 +6,6 @@ import java.io.*;
 
 public class TocaMidi{
 	
-    //variáveis de classe
-    private TocaMidi  tempo;
 	
 	private Sequencer sequenciador;
     private Sequence  sequencia   ;
@@ -25,8 +23,8 @@ public class TocaMidi{
     private boolean 		tocando = false, 
     						pausado = false, 
     						parado = false,
-    						novoTocador = true,
-    						pararContador = true;
+    						novoTocador = true;
+   // 						pararContador = true;
     
     private static Receiver receptor; //utilizado para alterar o volume
     
@@ -128,13 +126,13 @@ public class TocaMidi{
     			sequenciador.start();
     			tocando = true;
     			pausado = false;
-    			pararContador = false;
+    			//pararContador = false;
     		}else if(parado){
 				sequenciador.setMicrosecondPosition(0);
 				sequenciador.start();
 				tocando = true;
 				parado = false;
-				pararContador = false;
+				//pararContador = false;
     		}
     	}
     		
@@ -147,13 +145,13 @@ public class TocaMidi{
 			sequenciador.stop();
 			tocando = false;
 			pausado = true;
-			pararContador = true;
+			//pararContador = true;
 		}
 		else if (pausado){
 			sequenciador.start();
 			tocando = true;
 			pausado = false;
-			pararContador = false;
+			//pararContador = false;
 		}
     }
     
@@ -164,10 +162,14 @@ public class TocaMidi{
             parado = true;
             pausado = false;
             tocando = false;
-            pararContador = true;
+           // pararContador = true;
         }
     }
     
+	public void vaiPara(int segundos){
+		sequenciador.setMicrosecondPosition(segundos*1000000);
+	}
+	
     public void irPara(String durando) throws MidiUnavailableException{
         
         sequenciador.stop();
@@ -373,7 +375,7 @@ public class TocaMidi{
 		pausado = false;
 		parado = true;
 		novoTocador = false;
-		pararContador = true;
+		//pararContador = true;
 		return sequencia.getMicrosecondLength();
 	}
 	
@@ -394,5 +396,5 @@ public class TocaMidi{
 	public boolean tocando(){return tocando;}
 	public boolean parado(){return parado;}
 	public boolean pausado(){return pausado;}
-	public boolean pararContador(){return pararContador;}
+	public boolean novoTocador(){return novoTocador;}
 }

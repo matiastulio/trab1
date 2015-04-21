@@ -14,6 +14,8 @@ import javax.swing.SwingUtilities;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -292,21 +294,7 @@ public class MainGui {
 				if(e.getActionCommand() == "Abrir"){
 					caminhoArquivo = abrirArquivo();
 					if (caminhoArquivo != ""){
-						lblNomeArquivo.setText(caminhoArquivo);
-						try {
-							tempoTotal = tocaMidi.criaSequencia(caminhoArquivo,sliderVolume.getValue());
-							tempoTotal = tempoTotal/1000000;
-							tempoAtual = 0;
-							sliderTempoMusica.setMaximum((int) tempoTotal);
-							lblFimTempo.setText(toFormatoDeHora(tempoTotal));
-							lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
-						} catch (InvalidMidiDataException e1) {
-							e1.printStackTrace();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						} catch (MidiUnavailableException e1) {
-							e1.printStackTrace();
-						}
+						setupNovoMidi(caminhoArquivo);
 					}
 				}
 			}
@@ -315,8 +303,13 @@ public class MainGui {
 		//listener do botao parar
 		btnParar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				btnPararActionPerformed(e);//JButton source = (JButton)e.getSource();
-				atualizador.interrupt();
+				if(!tocaMidi.novoTocador()){
+					atualizador.interrupt();
+		        	tocaMidi.parar();
+					tempoAtual = 0;
+					lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+					sliderTempoMusica.setValue(0);
+				}
 
 			}
 		});
@@ -325,14 +318,12 @@ public class MainGui {
 		//listener do botao tocar
 		btnTocar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//btnTocarActionPerformed(e);//JButton source = (JButton)e.getSource();
 				try {
-					tocaMidi.tocar();
-					//atualizador.interrupt();
-					trabalhadorTempo();
-				} catch (MidiUnavailableException e1) {
-					e1.printStackTrace();
-				}
+					if(!tocaMidi.tocando()){
+						tocaMidi.tocar();
+						trabalhadorTempo();
+					}
+				} catch (MidiUnavailableException e1) {}
 			}
 		});
 		
@@ -340,9 +331,16 @@ public class MainGui {
 		//listener do botao pausar
 		btnPausar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				btnPausarActionPerformed(e);//JButton source = (JButton)e.getSource();
-				atualizador.interrupt();
-
+				if (tocaMidi.tocando()){
+					tocaMidi.pausar();
+					atualizador.interrupt();
+				}else if(tocaMidi.pausado()){
+					try {
+						tocaMidi.tocar();
+						trabalhadorTempo();
+					} catch (MidiUnavailableException e1) {}
+				}
+				
 			}
 		});
 		
@@ -350,30 +348,44 @@ public class MainGui {
 		//listener do slider de volume
 		sliderVolume.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
 				tocaMidi.mudaVolume(sliderVolume.getValue());
-				//lblNomeArquivo.setText(Integer.toString(source.getValue()));
 			}
 		});
 		
 		//listener do slider do tempo de musica
-		sliderTempoMusica.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
+//		sliderTempoMusica.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent e) {
+//				if(!tocaMidi.novoTocador()){
+//					//atualizador.interrupt();
+//					tocaMidi.vaiPara(sliderTempoMusica.getValue());
+//					//trabalhadorTempo();
+//				}
+//			}
+//		});
+		sliderTempoMusica.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {}			
+			@Override
+			public void mousePressed(MouseEvent e) {}			
+			@Override
+			public void mouseExited(MouseEvent e) {}			
+			@Override
+			public void mouseEntered(MouseEvent e) {}			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int mouseX = e.getX();
+				int tempoSelecionado = (int) Math.round(( (double) mouseX/ (double) sliderTempoMusica.getWidth())*
+												sliderTempoMusica.getMaximum());
+				if(!tocaMidi.novoTocador()){
+					atualizador.interrupt();
+					tempoAtual = tempoSelecionado;
+					sliderTempoMusica.setValue(tempoSelecionado);
+					tocaMidi.vaiPara(tempoSelecionado);
+					trabalhadorTempo();
+				}
 			}
 		});
-	}
-	
-	private void btnPararActionPerformed(ActionEvent e) {
-        tocaMidi.parar();
-    }
-	
-	private void btnTocarActionPerformed(ActionEvent e){
-		//tocaMidi.tocar();
-	}
-	
-	private void btnPausarActionPerformed(ActionEvent e){
-		tocaMidi.pausar();
 	}
 	
 	
@@ -417,6 +429,25 @@ public class MainGui {
 		  return "";
 	}
 	
+	
+	public void setupNovoMidi(String caminhoArquivo){
+		lblNomeArquivo.setText(caminhoArquivo);
+		try {
+			if(tocaMidi.tocando())
+				atualizador.interrupt();
+			
+			tempoTotal = tocaMidi.criaSequencia(caminhoArquivo,sliderVolume.getValue());
+			tempoTotal = tempoTotal/1000000;
+			tempoAtual = 0;
+			sliderTempoMusica.setMaximum((int) tempoTotal);
+			sliderTempoMusica.setValue(0);
+			lblFimTempo.setText(toFormatoDeHora(tempoTotal));
+			lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+		} 
+		catch (InvalidMidiDataException e1) {} 
+		catch (IOException e1) {} 
+		catch (MidiUnavailableException e1) {}
+	}
 
 	public String toFormatoDeHora(long seconds){
 		return String.format("%d:%d:%d",
@@ -446,6 +477,10 @@ public class MainGui {
 				}
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
+						if(tempoAtual+1 == tempoTotal){
+							sliderTempoMusica.setValue(0);
+							interrupt();
+						}
 						sliderTempoMusica.setValue((int) tempoAtual);
 						lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
 					}
