@@ -2,6 +2,8 @@ package br.unb.gui;
 
 import java.awt.EventQueue;
 
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -21,6 +23,8 @@ import javax.swing.JLabel;
 import javax.swing.JSeparator;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -31,11 +35,13 @@ import javax.swing.event.ChangeEvent;
 
 import br.unb.play.TocaMidi;
 
-public class MainGui implements Runnable {
+public class MainGui {
 
-	private static TocaMidi tocaMidi;
-	private int volumePorCento;
+	protected static TocaMidi tocaMidi;
 	
+	private static MainGui 	   window;
+	private Thread			   atualizador;
+	protected long			   tempoTotal,tempoAtual;
 	private JFrame             frmMidiPlayer;
 	private JMenuItem          mntmSair,mntmEscolherMidi;
 	private JMenuBar           menuBar;
@@ -44,24 +50,23 @@ public class MainGui implements Runnable {
 	private JPanel             painelAux,painelInfo;
 	private JSeparator         separadorDados;
 	private String             caminhoArquivo;
-	private JSlider            sliderTempoMusica,sliderVolume;
+	protected JSlider          sliderTempoMusica,sliderVolume;
 	private JButton            btnParar,btnTocar,btnPausar;
 	private GridBagConstraints gbc_sliderTempoMusica,gbc_lblNomeArquivo,gbc_lblInicioTempo,gbc_lblBarraTime,
 	                           gbc_lblFimTempo,gbc_btnParar,gbc_btnTocar,
 							   gbc_btnPausar,gbc_lblVolume,gbc_sliderVolume,gbc_separadorDados,gbc_painelAux;
-	private JLabel             lblNomeArquivo,lblInicioTempo,lblBarraTime,lblFimTempo,lblVolume,
+	private JLabel             lblNomeArquivo,lblBarraTime,lblFimTempo,lblVolume,
 	                           lblFormulaDeCompasso,lblMetro,lblAndamento,lblArmaduraDeTonalidade,
 							   lblArqArmadura,lblArqCompasso,lblArqBpm,lblArqMetro;
+	protected JLabel 			   lblInicioTempo;
 	
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainGui window = new MainGui();
-					Thread thread = new Thread(window);
+					window = new MainGui();
 					window.frmMidiPlayer.setVisible(true);
-					thread.start();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -78,6 +83,7 @@ public class MainGui implements Runnable {
 	
 	private void inicializa() {
 		//paineis, frames e layout
+		tocaMidi = new TocaMidi();
 		frmMidiPlayer = new JFrame();
 		painelInfo = 	new JPanel();
 		painelAux = 	new JPanel();
@@ -91,7 +97,7 @@ public class MainGui implements Runnable {
 		
 		//sliders 
 		sliderTempoMusica = new JSlider();
-		sliderVolume = 		new JSlider();
+		sliderVolume = 		new JSlider(0,126,75);
 		
 		//botoes
 		btnParar = 	new JButton("\u220e");
@@ -113,9 +119,9 @@ public class MainGui implements Runnable {
 		gbc_lblNomeArquivo = 	new GridBagConstraints();
 		
 		//labels
-		lblFimTempo               =	new JLabel("23:59:59"               );
-		lblInicioTempo            = new JLabel("23:59:59"               );
-		lblNomeArquivo            = new JLabel("Nome do arquivo MIDI "  );
+		lblFimTempo               =	new JLabel("        "               );
+		lblInicioTempo            = new JLabel("        "               );
+		lblNomeArquivo            = new JLabel("  "  					);
 		lblBarraTime              = new JLabel("/"                      );
 		lblVolume                 = new JLabel("Volume"                 );
 		lblFormulaDeCompasso      = new JLabel("Formula de Compasso:"   );
@@ -131,6 +137,8 @@ public class MainGui implements Runnable {
 		
 
 		separadorDados = new JSeparator();
+		
+		tempoAtual = tempoTotal = 0;
 	}
 
 
@@ -160,6 +168,7 @@ public class MainGui implements Runnable {
 		gbc_lblNomeArquivo.gridx     = 0;
 		gbc_lblNomeArquivo.gridy     = 1;
 		
+		sliderTempoMusica.setValue(0);
 		gbc_sliderTempoMusica.gridheight = 3;
 		gbc_sliderTempoMusica.gridwidth  = 16;
 		gbc_sliderTempoMusica.fill       = GridBagConstraints.HORIZONTAL;
@@ -282,8 +291,23 @@ public class MainGui implements Runnable {
 			public void actionPerformed(ActionEvent e) {
 				if(e.getActionCommand() == "Abrir"){
 					caminhoArquivo = abrirArquivo();
-					if (caminhoArquivo != "")
+					if (caminhoArquivo != ""){
 						lblNomeArquivo.setText(caminhoArquivo);
+						try {
+							tempoTotal = tocaMidi.criaSequencia(caminhoArquivo,sliderVolume.getValue());
+							tempoTotal = tempoTotal/1000000;
+							tempoAtual = 0;
+							sliderTempoMusica.setMaximum((int) tempoTotal);
+							lblFimTempo.setText(toFormatoDeHora(tempoTotal));
+							lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+						} catch (InvalidMidiDataException e1) {
+							e1.printStackTrace();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						} catch (MidiUnavailableException e1) {
+							e1.printStackTrace();
+						}
+					}
 				}
 			}
 		});
@@ -292,6 +316,8 @@ public class MainGui implements Runnable {
 		btnParar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnPararActionPerformed(e);//JButton source = (JButton)e.getSource();
+				atualizador.interrupt();
+
 			}
 		});
 		
@@ -299,7 +325,14 @@ public class MainGui implements Runnable {
 		//listener do botao tocar
 		btnTocar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				btnTocarActionPerformed(e);//JButton source = (JButton)e.getSource();
+				//btnTocarActionPerformed(e);//JButton source = (JButton)e.getSource();
+				try {
+					tocaMidi.tocar();
+					//atualizador.interrupt();
+					trabalhadorTempo();
+				} catch (MidiUnavailableException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		
@@ -308,6 +341,8 @@ public class MainGui implements Runnable {
 		btnPausar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnPausarActionPerformed(e);//JButton source = (JButton)e.getSource();
+				atualizador.interrupt();
+
 			}
 		});
 		
@@ -316,6 +351,7 @@ public class MainGui implements Runnable {
 		sliderVolume.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JSlider source = (JSlider)e.getSource();
+				tocaMidi.mudaVolume(sliderVolume.getValue());
 				//lblNomeArquivo.setText(Integer.toString(source.getValue()));
 			}
 		});
@@ -333,7 +369,7 @@ public class MainGui implements Runnable {
     }
 	
 	private void btnTocarActionPerformed(ActionEvent e){
-		tocaMidi.tocar();
+		//tocaMidi.tocar();
 	}
 	
 	private void btnPausarActionPerformed(ActionEvent e){
@@ -381,8 +417,52 @@ public class MainGui implements Runnable {
 		  return "";
 	}
 	
-	@Override
-	public void run() {
+
+	public String toFormatoDeHora(long seconds){
+		return String.format("%d:%d:%d",
+				TimeUnit.SECONDS.toHours(seconds), 
+			    TimeUnit.SECONDS.toMinutes(seconds),
+			    seconds%60);
+	}
+	
+	private void trabalhadorTempo() {
+		atualizador = new Thread() {
+			private boolean parar = false;
+			
+			@Override
+			public void interrupt() {
+				parar = true;
+				super.interrupt();
+			}
+
+
+			public void run() {
+			//System.out.println("progressbar trabalhando");
+			while(!parar && tempoAtual < tempoTotal){
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+
+				}
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						sliderTempoMusica.setValue((int) tempoAtual);
+						lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+					}
+				});
+				tempoAtual++;
+			}
+			//System.out.println("progressbar saindo");
+//			SwingUtilities.invokeLater(new Runnable() {
+//				public void run() {
+//					// statusLabel.setText("Completed.");
+//				}
+//			});
+
+		}
 		
+	};
+
+	atualizador.start();	
 	}
 }

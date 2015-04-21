@@ -1,6 +1,7 @@
 package br.unb.play;
 
 import javax.sound.midi.*;
+
 import java.io.*;
 
 public class TocaMidi{
@@ -11,7 +12,6 @@ public class TocaMidi{
 	private Sequencer sequenciador;
     private Sequence  sequencia   ;
     
-    private int             iniciar        ;
     private int             numeroTrilhas  ;
     private long            duracao        ;
     private double          duraTick       ;
@@ -22,17 +22,26 @@ public class TocaMidi{
     private String          nomearq        ;
     private String          tempoTotal     ;
     private static String   pathAudios     ;
+    private boolean 		tocando = false, 
+    						pausado = false, 
+    						parado = false,
+    						novoTocador = true,
+    						pararContador = true;
     
     private static Receiver receptor; //utilizado para alterar o volume
     
     static final int FORMULA_DE_COMPASSO = 0x58;
     static final int MENSAGEM_TONALIDADE = 0x59;
     
-    TocaMidi(){
-        iniciar = 1;
-        nomearq = "";
-        pathAudios = "caminho";//alterar
-        receptor = null;
+    public TocaMidi(){
+		try {
+			sequenciador = MidiSystem.getSequencer(false);
+			receptor = MidiSystem.getReceiver();
+			if (sequenciador == null)
+	              throw new MidiUnavailableException();
+			sequenciador.getTransmitter().setReceiver(receptor);
+			
+		} catch (MidiUnavailableException e) {e.printStackTrace();}
     }
     
     public void atualizarVolume(int volume) throws MidiUnavailableException{
@@ -111,44 +120,55 @@ public class TocaMidi{
         }
     }
     
-    public int tocar(){
-        
-        if (iniciar == 1){
-            
-        	iniciar = 0;
-            
-            try{
-                sequenciador.start();
-            }catch(NullPointerException e){ 
-            	return -1; 
-            }
-            return 1;
-        }
-        else{
-            try{
-                sequenciador.start();
-            }catch(NullPointerException e){ 
-            	return -1; 
-            }
-            return 0;
-        }
+    public void tocar() throws MidiUnavailableException{
+    	if (sequenciador== null)
+    		throw new MidiUnavailableException();
+    	else{
+    		if(pausado){
+    			sequenciador.start();
+    			tocando = true;
+    			pausado = false;
+    			pararContador = false;
+    		}else if(parado){
+				sequenciador.setMicrosecondPosition(0);
+				sequenciador.start();
+				tocando = true;
+				parado = false;
+				pararContador = false;
+    		}
+    	}
+    		
     }
     
     public void pausar(){
-        try{
-            sequenciador.stop();
-        }
-        catch(NullPointerException e) { }//exceção
+		if(parado)
+			return;
+		else if(tocando){
+			sequenciador.stop();
+			tocando = false;
+			pausado = true;
+			pararContador = true;
+		}
+		else if (pausado){
+			sequenciador.start();
+			tocando = true;
+			pausado = false;
+			pararContador = false;
+		}
     }
     
     public void parar (){
-        if(sequenciador != null){
+        if(sequenciador != null && !parado &&!novoTocador){
             sequenciador.stop();
             sequenciador.setMicrosecondPosition(0);
+            parado = true;
+            pausado = false;
+            tocando = false;
+            pararContador = true;
         }
     }
     
-    public void irPara(String durando){
+    public void irPara(String durando) throws MidiUnavailableException{
         
         sequenciador.stop();
                 
@@ -168,7 +188,7 @@ public class TocaMidi{
         
         sequenciador.setTickPosition((long)posiNova);
         
-        tocar();
+        //tocar();
     }
     
     static void retardo(int miliseg){
@@ -338,4 +358,41 @@ public class TocaMidi{
         }
         return sTom;
     }
+
+	public long criaSequencia(String local,int volume) throws InvalidMidiDataException, IOException, MidiUnavailableException{
+		FileInputStream is = new FileInputStream(local);
+		sequencia = MidiSystem.getSequence(is);
+		pathAudios = local;
+		if (sequenciador.isRunning())
+			sequenciador.stop();
+		
+		sequenciador.open();
+		sequenciador.setSequence(sequencia);
+		mudaVolume(volume);
+		tocando = false;
+		pausado = false;
+		parado = true;
+		novoTocador = false;
+		pararContador = true;
+		return sequencia.getMicrosecondLength();
+	}
+	
+	public void mudaVolume(int novoVolume){
+		ShortMessage volMessage = new ShortMessage();
+		for (int i = 0; i < 16; i++) {
+		  try {
+		    volMessage.setMessage(ShortMessage.CONTROL_CHANGE, i, 7, novoVolume+1);
+		  } catch (InvalidMidiDataException e) {}
+		  receptor.send(volMessage, -1);
+		}
+	}
+
+	public long posicaoAtualSequencia(){
+		return sequenciador.getMicrosecondPosition()/1000000;
+	}
+	
+	public boolean tocando(){return tocando;}
+	public boolean parado(){return parado;}
+	public boolean pausado(){return pausado;}
+	public boolean pararContador(){return pararContador;}
 }
