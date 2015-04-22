@@ -285,6 +285,7 @@ public class MainGui {
 		painelInfo.add(lblArqBpm);
 		painelInfo.add(lblAndamento);
 		
+		//adicionando ícone
 		URL caminho = this.getClass().getResource("player_play.png"); 
 		Image iconeApp = Toolkit.getDefaultToolkit().getImage(caminho); 
 		frmMidiPlayer.setIconImage(iconeApp);
