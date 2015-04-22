@@ -465,37 +465,36 @@ public class MainGui {
 	
 	private void trabalhadorTempo() {
 		atualizador = new Thread() {
-					private boolean parar = false;
+			private boolean parar = false;
 					
-					@Override
-					public void interrupt() {
-						parar = true;
-						super.interrupt();
+			@Override
+			public void interrupt() {
+				parar = true;
+				super.interrupt();
+			}
+		
+			public void run() {
+				while(!parar && tempoAtual < tempoTotal){
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+		
 					}
-		
-		
-					public void run() {
-					while(!parar && tempoAtual < tempoTotal){
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-		
-						}
-						SwingUtilities.invokeLater(new Runnable() {
-							public void run() {
-								if(tempoAtual+1 == tempoTotal){
-									sliderTempoMusica.setValue(0);
-									interrupt();
-								}
-								sliderTempoMusica.setValue((int) tempoAtual);
-								lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							if(tempoAtual+1 == tempoTotal){
+								sliderTempoMusica.setValue(0);
+								interrupt();
 							}
-						});
-						tempoAtual++;
-					}
+							sliderTempoMusica.setValue((int) tempoAtual);
+							lblInicioTempo.setText(toFormatoDeHora(tempoAtual));
+						}
+					});
+					tempoAtual++;
 				}
+			}
 				
-			};
+		};
 		atualizador.start();	
 	}
 }

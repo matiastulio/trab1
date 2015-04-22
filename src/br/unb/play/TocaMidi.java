@@ -17,6 +17,7 @@ public class TocaMidi{
     
     private static Receiver receptor; //utilizado para alterar o volume
     
+    static final int MESSAGEM_ANDAMENTO  = 0x51;
     static final int FORMULA_DE_COMPASSO = 0x58;
     static final int MENSAGEM_TONALIDADE = 0x59;
     
@@ -46,7 +47,6 @@ public class TocaMidi{
 				parado = false;
     		}
     	}
-    		
     }
     
     public void pausar(){
@@ -105,7 +105,7 @@ public class TocaMidi{
     {
 	   Track[] trilha = sequencia.getTracks();
 	   int MENSAGEM_TONALIDADE = 0x59;
-	   String stonalidade = "";
+	   String sTonalidade = "";
 	   MidiMessage m;
 	   MetaMessage mm;
 	   if ( trilha != null ) {
@@ -123,55 +123,51 @@ public class TocaMidi{
 							if (maior == 1)
 								smaior = "Menor";
 	
-							if(smaior.equalsIgnoreCase("Maior"))
-				            {
-				                switch (tonalidade)
-				                {
-				                    case -7: stonalidade = "Dob Maior"; break;
-				                    case -6: stonalidade = "Solb Maior"; break;
-				                    case -5: stonalidade = "Reb Maior"; break;
-				                    case -4: stonalidade = "Lab Maior"; break;
-				                    case -3: stonalidade = "Mib Maior"; break;
-				                    case -2: stonalidade = "Sib Maior"; break;
-				                    case -1: stonalidade = "Fa Maior"; break;
-				                    case  0: stonalidade = "Do Maior"; break;
-				                    case  1: stonalidade = "Sol Maior"; break;
-				                    case  2: stonalidade = "Re Maior"; break;
-				                    case  3: stonalidade = "La Maior"; break;
-				                    case  4: stonalidade = "Mi Maior"; break;
-				                    case  5: stonalidade = "Si Maior"; break;
-				                    case  6: stonalidade = "Fa# Maior"; break;
-				                    case  7: stonalidade = "Do# Maior"; break;
+							if(smaior.equalsIgnoreCase("Maior")){
+				                switch (tonalidade){
+				                    case -7: sTonalidade = "Dob Maior" ; break;
+				                    case -6: sTonalidade = "Solb Maior"; break;
+				                    case -5: sTonalidade = "Reb Maior" ; break;
+				                    case -4: sTonalidade = "Lab Maior" ; break;
+				                    case -3: sTonalidade = "Mib Maior" ; break;
+				                    case -2: sTonalidade = "Sib Maior" ; break;
+				                    case -1: sTonalidade = "Fa Maior"  ; break;
+				                    case  0: sTonalidade = "Do Maior"  ; break;
+				                    case  1: sTonalidade = "Sol Maior" ; break;
+				                    case  2: sTonalidade = "Re Maior"  ; break;
+				                    case  3: sTonalidade = "La Maior"  ; break;
+				                    case  4: sTonalidade = "Mi Maior"  ; break;
+				                    case  5: sTonalidade = "Si Maior"  ; break;
+				                    case  6: sTonalidade = "Fa# Maior" ; break;
+				                    case  7: sTonalidade = "Do# Maior" ; break;
 				                }
 				            }
 				
-				            else if(smaior.equalsIgnoreCase("Menor"))
-				            {
-				                switch (tonalidade)
-				                {
-				                    case -7: stonalidade = "Lab Menor"; break;
-				                    case -6: stonalidade = "Mib Menor"; break;
-				                    case -5: stonalidade = "Sib Menor"; break;
-				                    case -4: stonalidade = "Fa Menor"; break;
-				                    case -3: stonalidade = "Do Menor"; break;
-				                    case -2: stonalidade = "Sol Menor"; break;
-				                    case -1: stonalidade = "Re Menor"; break;
-				                    case  0: stonalidade = "La Menor"; break;
-				                    case  1: stonalidade = "Mi Menor"; break;
-				                    case  2: stonalidade = "Si Menor"; break;
-				                    case  3: stonalidade = "Fa# Menor"; break;
-				                    case  4: stonalidade = "Do# Menor"; break;
-				                    case  5: stonalidade = "Sol# Menor"; break;
-				                    case  6: stonalidade = "Re# Menor"; break;
-				                    case  7: stonalidade = "La# Menor"; break;
+				            else if(smaior.equalsIgnoreCase("Menor")){
+				                switch (tonalidade){
+				                    case -7: sTonalidade = "Lab Menor" ; break;
+				                    case -6: sTonalidade = "Mib Menor" ; break;
+				                    case -5: sTonalidade = "Sib Menor" ; break;
+				                    case -4: sTonalidade = "Fa Menor"  ; break;
+				                    case -3: sTonalidade = "Do Menor"  ; break;
+				                    case -2: sTonalidade = "Sol Menor" ; break;
+				                    case -1: sTonalidade = "Re Menor"  ; break;
+				                    case  0: sTonalidade = "La Menor"  ; break;
+				                    case  1: sTonalidade = "Mi Menor"  ; break;
+				                    case  2: sTonalidade = "Si Menor"  ; break;
+				                    case  3: sTonalidade = "Fa# Menor" ; break;
+				                    case  4: sTonalidade = "Do# Menor" ; break;
+				                    case  5: sTonalidade = "Sol# Menor"; break;
+				                    case  6: sTonalidade = "Re# Menor" ; break;
+				                    case  7: sTonalidade = "La# Menor" ; break;
 				                }
 				            }
-							return stonalidade;
+							return sTonalidade;
 				       }
-			      }
-		    }
-		}
-	return stonalidade;
+			     }
+		   }
+	}
+	return sTonalidade;
     }
 
 	public long criaSequencia(String local,int volume) throws InvalidMidiDataException, IOException, MidiUnavailableException{
@@ -206,35 +202,33 @@ public class TocaMidi{
 	
 	public String getAndamento() throws InvalidMidiDataException
 	{
-		   Track[] trilha = sequencia.getTracks();
-		   int MESSAGEM_ANDAMENTO = 0x51;
-		   MidiMessage m;
-		   MetaMessage mm;
-		   if ( trilha != null ) {
-			   for ( int i = 0; i < trilha.length; i++ ) {
-				      Track track = trilha[ i ];
-				      for ( int j = 0; j < track.size(); j++ ) {
-					       m = track.get( j ).getMessage();
-					       if(m instanceof MetaMessage && ((MetaMessage) m).getType() == MESSAGEM_ANDAMENTO){
-					    	    mm   = (MetaMessage)m;
-					            byte[]      data = mm.getData();
+		Track[] trilha = sequencia.getTracks();
+		MidiMessage m;
+		MetaMessage mm;
+		if ( trilha != null ) {
+			for ( int i = 0; i < trilha.length; i++ ) {
+				Track track = trilha[ i ];
+				for ( int j = 0; j < track.size(); j++ ) {
+				m = track.get( j ).getMessage();
+				if(m instanceof MetaMessage && ((MetaMessage) m).getType() == MESSAGEM_ANDAMENTO){
+					mm   = (MetaMessage)m;
+					byte[]      data = mm.getData();
 
-					            
-					            byte primeiro = data[0];
-					            byte segundo  = data[1];
-					            byte terceiro = data[2];
+					byte primeiro = data[0];
+					byte segundo  = data[1];
+					byte terceiro = data[2];
 
-					            long microseg = (long)(primeiro*Math.pow(2, 16) +
-					                                   segundo *Math.pow(2,  8) +
-					                                  terceiro);   
+					long microseg = (long)(primeiro*Math.pow(2, 16) +
+					                       segundo *Math.pow(2,  8) +
+					                       terceiro);   
 					                                                       
-					            return Float.toString((int)(60000000.0/microseg));
-					       }
-				      }
-			    }
+					return Float.toString((int)(60000000.0/microseg));
+				}
 			}
-		return "";
-	    }
+		}
+	}
+	return "";
+}
 	
 	
 	public boolean tocando(){return tocando;}
