@@ -19,7 +19,9 @@ import java.awt.event.MouseListener;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Toolkit;
 
 import javax.swing.JSlider;
 import javax.swing.JLabel;
@@ -27,6 +29,7 @@ import javax.swing.JSeparator;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.concurrent.TimeUnit;
@@ -281,6 +284,10 @@ public class MainGui {
 		painelInfo.add(lblArqCompasso);
 		painelInfo.add(lblArqBpm);
 		painelInfo.add(lblAndamento);
+		
+		URL caminho = this.getClass().getResource("player_play.png"); 
+		Image iconeApp = Toolkit.getDefaultToolkit().getImage(caminho); 
+		frmMidiPlayer.setIconImage(iconeApp);
 		
 	}
 
