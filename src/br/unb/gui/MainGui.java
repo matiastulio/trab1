@@ -268,10 +268,10 @@ public class MainGui {
 		lblMetro.setBounds(10, 95, 146, 14);
 		lblAndamento.setBounds(10, 70, 146, 14);
 		lblArmaduraDeTonalidade.setBounds(10, 20, 146, 14);
-		lblArqArmadura.setBounds(166, 20, 60, 14);
-		lblArqCompasso.setBounds(166, 45, 46, 14);
-		lblArqBpm.setBounds(166, 70, 46, 14);
-		lblArqMetro.setBounds(166, 95, 46, 14);
+		lblArqArmadura.setBounds(166, 20, 146, 14);
+		lblArqCompasso.setBounds(166, 45, 146, 14);
+		lblArqBpm.setBounds(166, 70, 135, 14);
+		lblArqMetro.setBounds(166, 95, 135, 14);
 		
 		painelInfo.add(lblFormulaDeCompasso);
 		painelInfo.add(lblArqMetro);
