@@ -27,6 +27,8 @@ import javax.swing.JSeparator;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
@@ -61,8 +63,10 @@ public class MainGui {
 	private JLabel             lblNomeArquivo,lblBarraTime,lblFimTempo,lblVolume,
 	                           lblFormulaDeCompasso,lblMetro,lblAndamento,lblArmaduraDeTonalidade,
 							   lblArqArmadura,lblArqCompasso,lblArqBpm,lblArqMetro;
-	protected JLabel 			   lblInicioTempo;
+	protected JLabel 		   lblInicioTempo;
 	
+	//formato do tempo da música
+	NumberFormat nf = new DecimalFormat("00");
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -444,14 +448,11 @@ public class MainGui {
 	}
 
 	public String toFormatoDeHora(long seconds){
-		Long hora = TimeUnit.SECONDS.toHours(seconds);
-		Long min  = TimeUnit.SECONDS.toMinutes(seconds);
-		Long seg  = seconds%60;
+		String hora = nf.format(TimeUnit.SECONDS.toHours(seconds));
+		String min  = nf.format(TimeUnit.SECONDS.toMinutes(seconds));
+		String seg  = nf.format(seconds%60);
 		
-		return String.format("%d:%d:%d",
-				TimeUnit.SECONDS.toHours(seconds), 
-			    TimeUnit.SECONDS.toMinutes(seconds),
-			    seconds%60);
+		return hora+":"+min+":"+seg;
 	}
 	
 	private void trabalhadorTempo() {
