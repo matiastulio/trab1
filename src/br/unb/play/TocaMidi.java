@@ -7,15 +7,17 @@ import java.io.*;
 
 public class TocaMidi{
 	
-	
-	private Sequencer sequenciador;
+
+    private static Receiver receptor; //utilizado para alterar o volume
+	private static Soundbank    bancoSELECIONADO;
+	private static Synthesizer  sintetizador = null;
+	private static Sequencer sequenciador;
     private Sequence  sequencia   ;
     private boolean 		tocando = false, 
     						pausado = false, 
     						parado = false,
     						novoTocador = true;
     
-    private static Receiver receptor; //utilizado para alterar o volume
     
     static final int FORMULA_DE_COMPASSO = 0x58;
     static final int MENSAGEM_TONALIDADE = 0x59;
@@ -235,7 +237,46 @@ public class TocaMidi{
 			}
 		return "";
 	    }
-	
+    //-------Carregador de bancos SF2
+    public static void carregarBANCO(String bancoSF2_externo)
+    {         
+      try { sintetizador = MidiSystem.getSynthesizer();
+            sintetizador.open();
+          }
+      catch (Exception ex) { System.out.println("Erro em MidiSystem.getSynthesizer(): " + ex);                                  
+                             return; 
+                           }
+                
+      Soundbank bancodefault = sintetizador.getDefaultSoundbank();
+      if(bancodefault != null)
+      { sintetizador.unloadAllInstruments(bancodefault);          
+      }         
+      
+      System.out.println("\nBanco: " + bancoSF2_externo +"\n");
+      
+      File arquivoSF2 = new File(bancoSF2_externo); 
+      if(!arquivoSF2.exists()) { System.out.println("Arquivo inexistente: " + bancoSF2_externo + "\n");
+                                 System.exit(0);
+                               }
+
+      try { bancoSELECIONADO = MidiSystem.getSoundbank(arquivoSF2); }
+      catch (Exception e) { e.printStackTrace(); }
+
+      sintetizador.loadAllInstruments( bancoSELECIONADO);
+
+      
+      //-----Lista dos instrumenteos carregados:
+      Instrument[] instrumentos = sintetizador.getLoadedInstruments();                  
+      for(int i=0; i<instrumentos.length; i++)       
+      { System.out.println("Instrumento "+ i + " = "+instrumentos[i].getName());
+      }
+      
+
+      try{ sequenciador.getTransmitter().setReceiver(sintetizador.getReceiver());
+         }
+      catch (Exception e) { System.out.println("Erro no carregamento do banco: "+e); }              
+
+    }	
 	
 	public boolean tocando(){return tocando;}
 	public boolean parado(){return parado;}
