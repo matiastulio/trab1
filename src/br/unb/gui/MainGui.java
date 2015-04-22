@@ -51,7 +51,7 @@ public class MainGui {
 	private Thread			   atualizador;
 	protected long			   tempoTotal,tempoAtual;
 	private JFrame             frmMidiPlayer;
-	private JMenuItem          mntmSair,mntmEscolherMidi;
+	private JMenuItem          mntmSair,mntmEscolherMidi,mntmNovoBanco;
 	private JMenuBar           menuBar;
 	private JMenu              mnArquivo;
 	private GridBagLayout      gridBagLayout;
@@ -104,6 +104,8 @@ public class MainGui {
 		mnArquivo = 		new JMenu("Arquivo");
 		mntmSair = 			new JMenuItem("Sair");
 		mntmEscolherMidi = 	new JMenuItem("Abrir");
+		mntmNovoBanco = new JMenuItem("Novo Banco");
+	
 		
 		//sliders 
 		sliderTempoMusica = new JSlider();
@@ -161,9 +163,15 @@ public class MainGui {
 		frmMidiPlayer.setJMenuBar(menuBar);
 		frmMidiPlayer.setTitle("MIDI Player");
 		
+		//adicionando ícone
+		URL caminho = this.getClass().getResource("player_play.png"); 
+		Image iconeApp = Toolkit.getDefaultToolkit().getImage(caminho); 
+		frmMidiPlayer.setIconImage(iconeApp);
+		
 		//configuracao do menu de opcoes
 		menuBar.add(mnArquivo);
 		mnArquivo.add(mntmEscolherMidi);
+		mnArquivo.add(mntmNovoBanco);
 		mnArquivo.add(mntmSair);
 		
 		// configuracao do layout em gridbag, posicionamento de cada elemento do layout
@@ -285,15 +293,22 @@ public class MainGui {
 		painelInfo.add(lblArqBpm);
 		painelInfo.add(lblAndamento);
 		
-		//adicionando Ã­cone
-		URL caminho = this.getClass().getResource("player_play.png"); 
-		Image iconeApp = Toolkit.getDefaultToolkit().getImage(caminho); 
-		frmMidiPlayer.setIconImage(iconeApp);
-		
 	}
 
 
 	private void listeners(){
+		
+		mntmNovoBanco.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(e.getActionCommand() == "Novo Banco"){
+					String caminhoBanco = abrirArquivo();
+					if (caminhoBanco != ""){
+						//setupNovoMidi(caminhoArquivo);
+						TocaMidi.carregarBANCO(caminhoBanco);
+					}
+				}
+			}
+		});
 		
 		//listener do botao sair do menu
 		mntmSair.addActionListener(new ActionListener() {
